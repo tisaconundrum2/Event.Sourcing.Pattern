@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ConferenceManagement.Api/ConferenceManagement.Api.csproj" />
+    <Project Path="src/ConferenceManagement.MessageQueue/ConferenceManagement.MessageQueue.csproj" />
+  </Folder>
+</Solution>
