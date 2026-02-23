@@ -1,0 +1,6 @@
+@ConferenceManagement.MessageQueue_HostAddress = http://localhost:5070
+
+GET {{ConferenceManagement.MessageQueue_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

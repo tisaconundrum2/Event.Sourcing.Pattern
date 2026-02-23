@@ -1,0 +1,50 @@
+services:
+  # ── PostgreSQL Event Store ─────────────────────────────────────────────────
+  postgres:
+    image: postgres:latest
+    container_name: conference-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: conference_events
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d conference_events"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Native .NET Message Queue Service ─────────────────────────────────────
+  queue:
+    build:
+      context: .
+      dockerfile: src/ConferenceManagement.MessageQueue/Dockerfile
+    container_name: conference-queue
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+  # ── Conference Management API ──────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: src/ConferenceManagement.Api/Dockerfile
+    container_name: conference-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__EventStore: "Host=postgres;Port=5432;Database=conference_events;Username=postgres;Password=postgres"
+      MessageQueue__BaseUrl: "http://queue:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      queue:
+        condition: service_started
+
+volumes:
+  postgres_data:
